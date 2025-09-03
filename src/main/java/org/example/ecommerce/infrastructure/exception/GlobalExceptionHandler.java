@@ -1,0 +1,65 @@
+package org.example.ecommerce.infrastructure.exception;
+
+import jakarta.servlet.http.HttpServletRequest;
+import lombok.extern.slf4j.Slf4j;
+import org.example.ecommerce.domain.model.user.exception.UserAlreadyExistsException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.time.LocalDateTime;
+
+@Slf4j
+@RestControllerAdvice
+public class GlobalExceptionHandler {
+    // validation errors from @Valid
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorDetails> handleValidationExceptions(
+            MethodArgumentNotValidException ex,
+            HttpServletRequest request) {
+        String errorMessage = ex.getBindingResult().getFieldErrors().stream()
+                .map(error -> error.getDefaultMessage())
+                .reduce((m1, m2) -> m1 + "; " + m2)
+                .orElse("Validation failed");
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(buildErrorDetails(request, HttpStatus.BAD_REQUEST,
+                        errorMessage));
+    }
+    @ExceptionHandler({
+            UserAlreadyExistsException.class,
+
+    })
+    public ResponseEntity<ErrorDetails> handleConflictExceptions(
+            RuntimeException ex,
+            HttpServletRequest request) {
+
+        log.warn("Conflict Exception: {}", ex.getMessage());
+
+
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(buildErrorDetails(request, HttpStatus.CONFLICT, ex.getMessage()));
+    }
+    // unified error response - النسخة الأساسية
+    private ErrorDetails buildErrorDetails(HttpServletRequest request,
+                                           HttpStatus status,
+                                           String message) {
+        return buildErrorDetails(request, status, message, message);
+    }
+
+    // unified error response - النسخة مع التفاصيل
+    private ErrorDetails buildErrorDetails(HttpServletRequest request,
+                                           HttpStatus status,
+                                           String message,
+                                           String details) {
+        ErrorDetails errorResponse = new ErrorDetails();
+        errorResponse.setTimestamp(LocalDateTime.now());
+        errorResponse.setStatus(status.value());
+        errorResponse.setError(status.getReasonPhrase());
+        errorResponse.setMessage(message);
+        errorResponse.setPath(request.getRequestURI());
+        return errorResponse;
+    }
+}
