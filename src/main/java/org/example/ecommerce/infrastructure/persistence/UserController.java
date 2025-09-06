@@ -62,28 +62,49 @@ public class UserController {
         }
     }
 
+
     @PatchMapping("/update")
-    public ResponseEntity<?> updateUserProfile(@RequestBody UserUpdateDto userFullInfo,
-                                               @RequestHeader(value = "Authorization", required = false) String jwt) {
+    public ResponseEntity<?> updateUser(@RequestBody UserUpdateDto userFullInfo,
+                                        @RequestParam(required = false) String email,
+                                        @RequestParam(required = false) String phoneNumber,
+                                        @RequestParam(required = false) Long id,
+                                        @RequestHeader(value = "Authorization", required = false) String jwt) {
 
-        log.info("Received request to update user: {}", userFullInfo);
-
-        if (jwt == null || jwt.trim().isEmpty()) {
-            log.warn("Authorization header is missing");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
-                    .body(Map.of("error", "Authorization header is missing"));
+        if (userFullInfo == null) {
+            log.warn("Update request body is null");
+            return ResponseEntity.badRequest().body("User data must be provided");
         }
-        String email = jwtUtil.extractEmailFromJwt(jwt);
-        log.debug("Extracted email from JWT: {}", email);
 
-        Optional<UserProfile> updatedUser = userService.updateUser(userFullInfo, email);
+        Optional<UserProfile> updatedUser = Optional.empty();
 
-        if (updatedUser.isPresent()) {
-            log.info("User with email [{}] updated successfully", email);
-            return ResponseEntity.ok(updatedUser.get());
+        if (id != null) {
+            log.info("Updating user by ID: {}", id);
+            updatedUser = userService.updateUserById(userFullInfo, id);
+        } else if (email != null) {
+            log.info("Updating user by email: {}", email);
+            updatedUser = userService.updateUserByEmail(userFullInfo, email);
+        } else if (phoneNumber != null) {
+            log.info("Updating user by phone number: {}", phoneNumber);
+            updatedUser = userService.updateUserByPhone(userFullInfo, phoneNumber);
+        } else if (jwt != null) {
+            log.info("Updating user by jwt: {}", jwt);
+            updatedUser = userService.updateUserByJwt(userFullInfo, jwt); // تأكد من وجود هذه الدالة
         } else {
-            log.error("Failed to update user with email [{}]", email);
-            return ResponseEntity.badRequest().body("User update failed");
+            log.warn("No identifier provided for update");
+            return ResponseEntity.badRequest().body("No identifier provided. Please provide email, phoneNumber, id, or jwt");
         }
+
+        return updatedUser
+                .<ResponseEntity<?>>map(user -> {
+                    log.info("User updated successfully: {}", user.email());
+                    return ResponseEntity.ok(user);
+                })
+                .orElseGet(() -> {
+                    log.error("Failed to update user with provided identifier");
+                    return ResponseEntity.badRequest().body("User update failed");
+                });
+
     }
+
+
 }

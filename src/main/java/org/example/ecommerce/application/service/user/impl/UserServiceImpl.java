@@ -13,6 +13,7 @@ import org.example.ecommerce.infrastructure.mapper.UserMapper;
 import org.example.ecommerce.infrastructure.utils.IsEmail;
 import org.example.ecommerce.infrastructure.utils.IsFullName;
 import org.example.ecommerce.infrastructure.utils.IsPhoneNumber;
+import org.example.ecommerce.infrastructure.utils.JwtUtil;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,78 +25,135 @@ import java.util.Optional;
 @RequiredArgsConstructor
 @Slf4j
 public class UserServiceImpl implements UserService {
-    private final GetUserContext getUserContext ;
+    private final GetUserContext getUserContext;
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
     private final MessageSource messageSource;
+    private final JwtUtil jwtUtil;
+
     @Override
     public Optional<UserProfile> findByEmail(String email) {
-        return getUserContext.getUser(email,GetUserByType.EMAIL);
+        return getUserContext.getUser(email, GetUserByType.EMAIL);
     }
 
     @Override
     public Optional<UserProfile> findById(String id) {
-        return getUserContext.getUser(id,GetUserByType.ID);
+        return getUserContext.getUser(id, GetUserByType.ID);
     }
 
     @Override
     public Optional<UserProfile> findByPhoneNumber(String phoneNumber) {
-        return getUserContext.getUser(phoneNumber,GetUserByType.PHONE);
+        return getUserContext.getUser(phoneNumber, GetUserByType.PHONE);
     }
 
     @Override
     public Optional<UserProfile> findByJwt(String jwt) {
-        return getUserContext.getUser(jwt,GetUserByType.JWT);
+        return getUserContext.getUser(jwt, GetUserByType.JWT);
     }
 
     @Override
-    public Optional<UserProfile> updateUser(UserUpdateDto userDTO, String email) {
+    public Optional<UserProfile> updateUserByJwt(UserUpdateDto userDTO, String jwt) {
+        String email = jwtUtil.extractEmailFromJwt(jwt);
+        return updateUser(userDTO, email);
+    }
 
+    @Override
+    public Optional<UserProfile> updateUserByEmail(UserUpdateDto userDTO, String email) {
+        if (userRepository.findByEmail(userDTO.email()).isEmpty()) {
+            throw new UserNotFoundException(messageSource.getMessage("user.notfound.email", new Object[]{email}, LocaleContextHolder.getLocale()));
+        }
+        return updateUser(userDTO, email);
+    }
+
+    @Override
+    public Optional<UserProfile> updateUserByPhone(UserUpdateDto userDTO, String phoneNumber) {
+
+        Optional<User> user = userRepository.findByPhoneNumber(phoneNumber);
+
+        if (user.isEmpty()) {
+            throw new UserNotFoundException(
+                    messageSource.getMessage(
+                            "user.notfound.phone",
+                            new Object[]{phoneNumber},
+                            LocaleContextHolder.getLocale()
+                    )
+            );
+        }
+
+        String email = user.get().getEmail();
+
+        return updateUser(userDTO, email);
+    }
+
+
+    @Override
+    public Optional<UserProfile> updateUserById(UserUpdateDto userDTO, Long id) {
+        Optional<User> user = userRepository.findById(id);
+        if (user.isEmpty()) {
+            throw new UserNotFoundException(
+                    messageSource.getMessage(
+                            "error.user.notfound.id",
+                            new Object[]{id.toString()},
+                            LocaleContextHolder.getLocale()
+                    )
+            );
+        }
+
+        String email = user.get().getEmail();
+
+        return updateUser(userDTO, email);
+
+    }
+
+
+    private Optional<UserProfile> updateUser(UserUpdateDto userDTO, String email) {
         if (null == userDTO) {
             log.warn("UserUpdateDto is null, update aborted");
             return Optional.empty();
         }
+            if (userRepository.findByEmail(userDTO.email()).isPresent()) {
+                throw new EmailAlreadyExists(messageSource.getMessage("user.exists.email", new Object[]{userDTO.email()}, LocaleContextHolder.getLocale()));
+            }
 
 
-        if (userRepository.findByEmail(userDTO.email()).isPresent()) {
-            throw new EmailAlreadyExists(messageSource.getMessage("user.exists.email",new Object[]{userDTO.email()}, LocaleContextHolder.getLocale()));
-        }
 
         if (userRepository.existsByPhoneNumber(userDTO.phoneNumber())) {
-            throw new PhoneNumberAlreadyExists(messageSource.getMessage("user.exists.phone",new Object[]{userDTO.phoneNumber()}, LocaleContextHolder.getLocale()));
+                throw new PhoneNumberAlreadyExists(messageSource.getMessage("user.exists.phone", new Object[]{userDTO.phoneNumber()}, LocaleContextHolder.getLocale()));
+            }
+
+
+
+
+            return userRepository.findByEmail(email)
+                    .map(user -> {
+                        if (userDTO.email() != null) {
+                            if (!IsEmail.isEmail(userDTO.email())) {
+                                throw new EmailIsNotValid(messageSource.getMessage("user.email.invalid", new Object[]{userDTO.phoneNumber()}, LocaleContextHolder.getLocale()));
+                            }
+                            user.setEmail(userDTO.email());
+                        }
+
+                        if (userDTO.fullName() != null) {
+                            if (!IsFullName.isValid(userDTO.fullName())) {
+                                throw new NameIsNotVlild(messageSource.getMessage("user.fullName.size", new Object[]{userDTO.phoneNumber()}, LocaleContextHolder.getLocale()));
+
+                            }
+                            user.setFullName(userDTO.fullName());
+                        }
+                        if (userDTO.pickupAddress() != null) user.setPickupAddress(userDTO.pickupAddress());
+                        if (userDTO.phoneNumber() != null) {
+                            if (!IsPhoneNumber.isEgyptianPhone(userDTO.phoneNumber())) {
+                                throw new PhoneNumberIsNotValid(messageSource.getMessage("user.phone.invalid", new Object[]{userDTO.phoneNumber()}, LocaleContextHolder.getLocale()));
+
+                            }
+                            user.setPhoneNumber(userDTO.phoneNumber());
+                        }
+
+                        User savedUser = userRepository.save(user);
+                        return userMapper.toUserProfile(savedUser);
+                    });
         }
 
 
-        return userRepository.findByEmail(email)
-                .map(user -> {
-                    if (userDTO.email() != null){
-                        if (!IsEmail.isEmail(userDTO.email())) {
-                            throw new EmailIsNotValid(messageSource.getMessage("user.email.invalid",new Object[]{userDTO.phoneNumber()}, LocaleContextHolder.getLocale()));
-                        }
-                        user.setEmail(userDTO.email());
-                    }
-
-                    if (userDTO.fullName() != null){
-                        if (!IsFullName.isValid(userDTO.fullName())) {
-                            throw new NameIsNotVlild(messageSource.getMessage("user.fullName.size",new Object[]{userDTO.phoneNumber()}, LocaleContextHolder.getLocale()));
-
-                        }
-                        user.setFullName(userDTO.fullName());
-                    }
-                    if (userDTO.pickupAddress() != null) user.setPickupAddress(userDTO.pickupAddress());
-                    if (userDTO.phoneNumber() != null) {
-                        if (!IsPhoneNumber.isEgyptianPhone(userDTO.phoneNumber())) {
-                            throw new PhoneNumberIsNotValid(messageSource.getMessage("user.phone.invalid",new Object[]{userDTO.phoneNumber()}, LocaleContextHolder.getLocale()));
-
-                        }
-                        user.setPhoneNumber(userDTO.phoneNumber());
-                    }
-
-                    User savedUser = userRepository.save(user);
-                    return userMapper.toUserProfile(savedUser);
-                });
-
-
-    }
 }

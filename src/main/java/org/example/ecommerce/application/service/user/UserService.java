@@ -20,9 +20,17 @@ public interface UserService {
 
     // for user
     Optional<UserProfile> findByJwt(String jwt);
+    Optional<UserProfile> updateUserByJwt(UserUpdateDto userDTO, String jwt);
 
-//    for user
-     Optional<UserProfile> updateUser(UserUpdateDto userDTO, String email);
+//    for admin only
+
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN')")
+    Optional<UserProfile> updateUserByEmail(UserUpdateDto userDTO, String email);
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    Optional<UserProfile> updateUserByPhone(UserUpdateDto userDTO, String phoneNumber);
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    Optional<UserProfile> updateUserById(UserUpdateDto userDTO, Long id);
+
     // Optional<UserDTO> updateProfileImage(String imageUrl, String email);
     // void deleteUser(Long id);
     // Boolean updatePassword(ChangeUserPWD changeUserPWD);
