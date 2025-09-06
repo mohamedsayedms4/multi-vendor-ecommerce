@@ -3,6 +3,7 @@ package org.example.ecommerce.infrastructure.mapper;
 import org.example.ecommerce.domain.model.user.User;
 import org.example.ecommerce.infrastructure.dto.user.SignUpRequest;
 import org.example.ecommerce.infrastructure.dto.user.SignUpRequestWithoutImageProfille;
+import org.example.ecommerce.infrastructure.dto.user.UserProfile;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -27,4 +28,6 @@ public interface UserMapper {
     @Mapping(target = "authorities", ignore = true)   // مش جايه من DTO
     @Mapping(target = "pickupAddress", ignore = true) // ممكن نعملها DTO بعدين
     User toUser(SignUpRequestWithoutImageProfille dto);
+
+    UserProfile toUserProfile(User user);
 }

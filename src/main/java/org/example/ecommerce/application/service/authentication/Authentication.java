@@ -13,7 +13,7 @@ public interface Authentication {
     Optional<ApiResponse> loginWithEmail(LoginRequestWithEmail request);
     Optional<ApiResponse> loginWithPhoneNumber(LoginRequestWithPhoneNumber request);
 
-        Optional<ApiResponse> loginWithOtp(LoginRequestWithEmail request);
+    Optional<ApiResponse> loginWithOtp(LoginRequestWithEmail request);
 //    AuthResponse verifyOtp(OtpVerificationRequest request);
 
 

@@ -43,7 +43,6 @@ public class LoginContext {
         throw new IllegalArgumentException("Invalid login identifier: " + emailOrPhone);
     }
 
-    // ✅ Overloads للحفاظ على التوافق مع الكود القديم
     public ApiResponse login(LoginRequestWithEmail request) {
         return login(request.email(), request.password());
     }
