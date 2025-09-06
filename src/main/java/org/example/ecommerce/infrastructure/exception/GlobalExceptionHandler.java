@@ -1,6 +1,7 @@
 package org.example.ecommerce.infrastructure.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.example.ecommerce.domain.model.user.exception.InvalidPWD;
 import org.example.ecommerce.domain.model.user.exception.UserAlreadyExistsException;
@@ -29,6 +30,19 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(buildErrorDetails(request, HttpStatus.BAD_REQUEST,
                         errorMessage));
+    }
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ErrorDetails> handleConstraintViolation(
+            ConstraintViolationException ex,
+            HttpServletRequest request) {
+
+        String errorMessage = ex.getConstraintViolations().stream()
+                .map(cv -> cv.getMessage())
+                .reduce((m1, m2) -> m1 + "; " + m2)
+                .orElse("Validation failed");
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(buildErrorDetails(request, HttpStatus.BAD_REQUEST, errorMessage));
     }
     @ExceptionHandler({
             UserAlreadyExistsException.class,

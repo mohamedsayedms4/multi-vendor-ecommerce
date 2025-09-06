@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Valid;
+import jakarta.validation.Validator;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.ecommerce.application.service.authentication.Authentication;
@@ -15,12 +16,12 @@ import org.example.ecommerce.infrastructure.response.ApiResponse;
 import org.example.ecommerce.infrastructure.dto.user.SignUpRequest;
 import org.example.ecommerce.infrastructure.utils.ImageUploadUtil;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Optional;
+import java.util.Set;
 
 @Slf4j
 @RestController
@@ -29,6 +30,8 @@ import java.util.Optional;
 public class AuthenticationController {
     private final Authentication userService;
     private final ImageUploadUtil imageUploadUtil;
+    private final Validator validator;
+
 
     @PostMapping("/sign-up")
     public ResponseEntity<ApiResponse> signup(
@@ -41,7 +44,10 @@ public class AuthenticationController {
         SignUpRequestWithoutImageProfille signUpRequest =
                 objectMapper.readValue(request, SignUpRequestWithoutImageProfille.class);
 
-
+        Set<ConstraintViolation<SignUpRequestWithoutImageProfille>> violations = validator.validate(signUpRequest);
+        if (!violations.isEmpty()) {
+            throw new ConstraintViolationException("Validation failed", violations);
+        }
 
         String imageUrl = null;
         if (image != null && !image.isEmpty()) {
@@ -69,38 +75,6 @@ public class AuthenticationController {
     }
 
 
-//    @PostMapping(value = "/sign-up", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-//    public ResponseEntity<ApiResponse> signup(
-//            @RequestPart("data") SignUpRequestWithoutImageProfille request,
-//            @RequestPart(value = "image", required = false) MultipartFile image
-//    ) {
-//        log.info("Signup request received for email: {}", request.userEmail());
-//
-//        // لو فيه صورة ارفعها
-//        String imageUrl = null;
-//        if (image != null && !image.isEmpty()) {
-//            imageUrl = imageUploadUtil.saveImage(image);
-//            log.info("Uploaded image: {}", imageUrl);
-//        }
-//
-//        // نعيد بناء SignUpRequest مع الـ imageUrl
-//        SignUpRequest updatedRequest = new SignUpRequest(
-//                request.userEmail(),
-//                request.userPassword(),
-//                request.userFullName(),
-//                request.userPhoneNumber(),
-//                imageUrl
-//        );
-//
-//        Optional<ApiResponse> savedUser = userService.createCustomer(updatedRequest);
-//
-//        if (savedUser.isEmpty()) {
-//            log.warn("Signup failed for email: {}", request.userEmail());
-//            return ResponseEntity.badRequest().build();
-//        }
-//
-//        return ResponseEntity.status(HttpStatus.CREATED).body(savedUser.get());
-//    }
 
 
     @PostMapping("/login-email")
