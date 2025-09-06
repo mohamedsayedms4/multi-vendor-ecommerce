@@ -26,7 +26,7 @@ public class FindUserByEmailStrategy implements GetUserStrategy {
                 .map(userMapper::toUserProfile);
         if (user.isEmpty()) {
             log.error("User not found with user Email: {}", input);
-            String errorMessage = messageSource.getMessage("error.user.notFound.email",
+            String errorMessage = messageSource.getMessage("user.notfound.email",
                     new Object[]{input},
                     LocaleContextHolder.getLocale());
             throw new UserNotFoundException(errorMessage);

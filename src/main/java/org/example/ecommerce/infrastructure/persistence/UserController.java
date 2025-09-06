@@ -22,32 +22,6 @@ import java.util.Optional;
 public class UserController {
 
     private final UserService userService;
-    @GetMapping("/email/{email}")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<?> getUserProfileByEmail(@PathVariable
-                                                   @NotBlank(message = "{email.invalid.blank.input.from.user}")   // لو الايميل فاضي
-                                                   @Email(message = "{email.invalid.format.input.from.user}")     // لو الايميل مش صحيح
-                                                   String email)
-    {
-        Optional<UserProfile> user = userService.findByEmail(email);
-        if (user.isPresent()) {
-            return new ResponseEntity<>(user.get(), HttpStatus.OK);
-        }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-    }
-
-    @GetMapping("/id/{id}")
-    @PreAuthorize("hasRole('ROLE_ADMIN')")
-    public ResponseEntity<?> getUserProfileById(
-            @NotBlank(message = "id cannot be blank")
-            @Pattern(regexp = "^[0-9]+$",message = "Only numbers")
-            @PathVariable String id) {
-        Optional<UserProfile> user = userService.findById(id);
-        if (user.isPresent()) {
-            return new ResponseEntity<>(user.get(), HttpStatus.OK);
-        }
-        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-    }
 
 
     @PostMapping("/jwt")

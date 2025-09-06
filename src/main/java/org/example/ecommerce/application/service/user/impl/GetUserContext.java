@@ -25,11 +25,13 @@ public class GetUserContext {
         // جلب الاستراتيجية المناسبة
         GetUserStrategy strategy = applicationContext.getBean(beanName, GetUserStrategy.class);
 
-        try {
-            return strategy.getUser(input);
-        } catch (Exception e) {
-            log.error("Error fetching user with type {}: {}", type, e.getMessage());
-            return Optional.empty();
-        }
+                    return strategy.getUser(input);
+
+//        try {
+//            return strategy.getUser(input);
+//        } catch (Exception e) {
+//            log.error("Error fetching user with type {}: {}", type, e.getMessage());
+//            return Optional.empty();
+//        }
     }
 }
