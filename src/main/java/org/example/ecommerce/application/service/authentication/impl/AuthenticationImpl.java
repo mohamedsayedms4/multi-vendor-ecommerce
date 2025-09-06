@@ -33,7 +33,7 @@ public class AuthenticationImpl implements Authentication {
 
     @Override
     @Transactional
-    public Optional<ApiResponse> createCustomer(SignUpRequest request) {
+    public Optional<ApiResponse> createCustomer(SignUpRequest request ) {
         log.info("Create Customer Request");
 
         SignUpRequest signUpRequest = new SignUpRequest(
@@ -41,7 +41,7 @@ public class AuthenticationImpl implements Authentication {
                 request.userPassword(),
                 request.userFullName(),
                 request.userPhoneNumber(),
-                request.userImageUrl()
+                request.imageUrl()
         );
 
         if (userRepository.findByEmail(signUpRequest.userEmail()).isPresent()) {
@@ -64,8 +64,8 @@ public class AuthenticationImpl implements Authentication {
         log.debug("User FullName: {}", signUpRequest.userFullName());
         user.setPhoneNumber(signUpRequest.userPhoneNumber());
         log.debug("User Phone: {}", signUpRequest.userPhoneNumber());
-        user.setImageUrl(signUpRequest.userImageUrl());
-        log.debug("User Image URL: {}", signUpRequest.userImageUrl());
+        user.setImageUrl(request.imageUrl());
+        log.debug("User Image URL: {}", request.imageUrl());
 
         Authority authority = new Authority();
         authority.setRole(UserRole.ROLE_CUSTOMER);

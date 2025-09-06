@@ -9,7 +9,7 @@ import org.example.ecommerce.infrastructure.dto.user.SignUpRequest;
 import java.util.Optional;
 
 public interface Authentication {
-    Optional<ApiResponse> createCustomer(SignUpRequest request);
+    Optional<ApiResponse> createCustomer(SignUpRequest request );
     Optional<ApiResponse> loginWithEmail(LoginRequestWithEmail request);
     Optional<ApiResponse> loginWithPhoneNumber(LoginRequestWithPhoneNumber request);
 
