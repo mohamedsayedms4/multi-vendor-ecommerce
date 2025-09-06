@@ -2,6 +2,7 @@ package org.example.ecommerce.application.service.user;
 
 
 
+import org.example.ecommerce.infrastructure.dto.user.UserUpdateDto;
 import org.example.ecommerce.infrastructure.dto.user.UserProfile;
 import org.springframework.security.access.prepost.PreAuthorize;
 
@@ -20,7 +21,8 @@ public interface UserService {
     // for user
     Optional<UserProfile> findByJwt(String jwt);
 
-    // Optional<UserDTO> updateUser(UserDTO userDTO, String email);
+//    for user
+     Optional<UserProfile> updateUser(UserUpdateDto userDTO, String email);
     // Optional<UserDTO> updateProfileImage(String imageUrl, String email);
     // void deleteUser(Long id);
     // Boolean updatePassword(ChangeUserPWD changeUserPWD);

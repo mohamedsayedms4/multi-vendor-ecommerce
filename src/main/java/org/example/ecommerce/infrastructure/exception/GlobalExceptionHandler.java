@@ -3,9 +3,7 @@ package org.example.ecommerce.infrastructure.exception;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
-import org.example.ecommerce.domain.model.user.exception.InvalidPWD;
-import org.example.ecommerce.domain.model.user.exception.UserAlreadyExistsException;
-import org.example.ecommerce.domain.model.user.exception.UserNotFoundException;
+import org.example.ecommerce.domain.model.user.exception.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -46,6 +44,8 @@ public class GlobalExceptionHandler {
     }
     @ExceptionHandler({
             UserAlreadyExistsException.class,
+            PhoneNumberAlreadyExists.class,
+            EmailAlreadyExists.class,
     })
     public ResponseEntity<ErrorDetails> handleConflictExceptions(
             RuntimeException ex,
@@ -70,6 +70,21 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(buildErrorDetails(request, HttpStatus.NOT_FOUND, ex.getMessage()));
+    }
+
+    @ExceptionHandler({
+            EmailIsNotValid.class,
+            PhoneNumberIsNotValid.class,
+            NameIsNotVlild.class,
+    })
+    public ResponseEntity<ErrorDetails> handleBadRequestExceptions(
+            RuntimeException ex,
+            HttpServletRequest request
+    ){
+        log.warn("Bad Request: {}", ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(buildErrorDetails(request, HttpStatus.BAD_REQUEST, ex.getMessage()));
     }
     // unified error response - النسخة الأساسية
     private ErrorDetails buildErrorDetails(HttpServletRequest request,

@@ -66,11 +66,11 @@ public class AuthenticationController {
         Optional<ApiResponse> savedUser = userService.createCustomer(updatedRequest);
 
         if (savedUser.isEmpty()) {
-            log.warn("Signup failed for email: {}", updatedRequest.userEmail());
+            log.warn("Signup failed for email: {}", updatedRequest.email());
             return ResponseEntity.badRequest().build();
         }
 
-        log.info("Signup successful for email: {}", updatedRequest.userEmail());
+        log.info("Signup successful for email: {}", updatedRequest.email());
         return ResponseEntity.status(HttpStatus.CREATED).body(savedUser.get());
     }
 

@@ -1,5 +1,6 @@
 package org.example.ecommerce.infrastructure.persistence;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -7,6 +8,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.ecommerce.application.service.user.UserService;
 import org.example.ecommerce.infrastructure.dto.user.UserProfile;
+import org.example.ecommerce.infrastructure.dto.user.UserUpdateDto;
+import org.example.ecommerce.infrastructure.utils.JwtUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,7 +25,7 @@ import java.util.Optional;
 public class UserController {
 
     private final UserService userService;
-
+    private final JwtUtil jwtUtil;
 
     @PostMapping("/jwt")
     public ResponseEntity<?> getUserProfileByJwt(
@@ -56,6 +59,31 @@ public class UserController {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", "JWT processing failed", "details", e.getMessage()));
+        }
+    }
+
+    @PatchMapping("/update")
+    public ResponseEntity<?> updateUserProfile(@RequestBody UserUpdateDto userFullInfo,
+                                               @RequestHeader(value = "Authorization", required = false) String jwt) {
+
+        log.info("Received request to update user: {}", userFullInfo);
+
+        if (jwt == null || jwt.trim().isEmpty()) {
+            log.warn("Authorization header is missing");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Authorization header is missing"));
+        }
+        String email = jwtUtil.extractEmailFromJwt(jwt);
+        log.debug("Extracted email from JWT: {}", email);
+
+        Optional<UserProfile> updatedUser = userService.updateUser(userFullInfo, email);
+
+        if (updatedUser.isPresent()) {
+            log.info("User with email [{}] updated successfully", email);
+            return ResponseEntity.ok(updatedUser.get());
+        } else {
+            log.error("Failed to update user with email [{}]", email);
+            return ResponseEntity.badRequest().body("User update failed");
         }
     }
 }

@@ -37,33 +37,33 @@ public class AuthenticationImpl implements Authentication {
         log.info("Create Customer Request");
 
         SignUpRequest signUpRequest = new SignUpRequest(
-                request.userEmail(),
-                request.userPassword(),
-                request.userFullName(),
-                request.userPhoneNumber(),
+                request.email(),
+                request.password(),
+                request.fullName(),
+                request.phoneNumber(),
                 request.imageUrl()
         );
 
-        if (userRepository.findByEmail(signUpRequest.userEmail()).isPresent()) {
-            log.error("User with email already exists: {}", signUpRequest.userEmail());
+        if (userRepository.findByEmail(signUpRequest.email()).isPresent()) {
+            log.error("User with email already exists: {}", signUpRequest.email());
             String msg = messageSource.getMessage("user.exists.email", null, LocaleContextHolder.getLocale());
             throw new UserAlreadyExistsException(msg);
         }
-        if (userRepository.findByPhoneNumber(signUpRequest.userPhoneNumber()).isPresent()) {
-            log.error("User phone number already exists: {}", signUpRequest.userPhoneNumber());
+        if (userRepository.findByPhoneNumber(signUpRequest.phoneNumber()).isPresent()) {
+            log.error("User phone number already exists: {}", signUpRequest.phoneNumber());
             String msg = messageSource.getMessage("user.exists.phone", null, LocaleContextHolder.getLocale());
             throw new UserAlreadyExistsException(msg);
         }
 
         User user = new User();
         log.info("Initializing User entity...");
-        user.setEmail(signUpRequest.userEmail());
-        log.debug("User Email: {}", signUpRequest.userEmail());
-        user.setPassword(passwordEncoder.encode(signUpRequest.userPassword()));
-        user.setFullName(signUpRequest.userFullName());
-        log.debug("User FullName: {}", signUpRequest.userFullName());
-        user.setPhoneNumber(signUpRequest.userPhoneNumber());
-        log.debug("User Phone: {}", signUpRequest.userPhoneNumber());
+        user.setEmail(signUpRequest.email());
+        log.debug("User Email: {}", signUpRequest.email());
+        user.setPassword(passwordEncoder.encode(signUpRequest.password()));
+        user.setFullName(signUpRequest.fullName());
+        log.debug("User FullName: {}", signUpRequest.fullName());
+        user.setPhoneNumber(signUpRequest.phoneNumber());
+        log.debug("User Phone: {}", signUpRequest.phoneNumber());
         user.setImageUrl(request.imageUrl());
         log.debug("User Image URL: {}", request.imageUrl());
 

@@ -11,23 +11,25 @@ import org.mapstruct.Mapping;
 
 public interface UserMapper {
     // من SignUpRequest -> User
-    @Mapping(target = "email", source = "userEmail")
-    @Mapping(target = "password", source = "userPassword")
-    @Mapping(target = "fullName", source = "userFullName")
-    @Mapping(target = "phoneNumber", source = "userPhoneNumber")
+    @Mapping(target = "email", source = "email")
+    @Mapping(target = "password", source = "password")
+    @Mapping(target = "fullName", source = "fullName")
+    @Mapping(target = "phoneNumber", source = "phoneNumber")
     @Mapping(target = "authorities", ignore = true)   // مش جايه من DTO
     @Mapping(target = "pickupAddress", ignore = true) // ممكن نعملها DTO بعدين
     User toUser(SignUpRequest dto);
 
     // من SignUpRequest -> User
+    // من SignUpRequestWithoutImageProfille -> User
     @Mapping(target = "email", source = "userEmail")
     @Mapping(target = "password", source = "userPassword")
     @Mapping(target = "fullName", source = "userFullName")
     @Mapping(target = "phoneNumber", source = "userPhoneNumber")
     @Mapping(target = "imageUrl" , ignore = true)
-    @Mapping(target = "authorities", ignore = true)   // مش جايه من DTO
-    @Mapping(target = "pickupAddress", ignore = true) // ممكن نعملها DTO بعدين
+    @Mapping(target = "authorities", ignore = true)
+    @Mapping(target = "pickupAddress", ignore = true)
     User toUser(SignUpRequestWithoutImageProfille dto);
+
 
     UserProfile toUserProfile(User user);
 }
