@@ -2,7 +2,9 @@ package org.example.ecommerce.infrastructure.exception;
 
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
+import org.example.ecommerce.domain.model.user.exception.InvalidPWD;
 import org.example.ecommerce.domain.model.user.exception.UserAlreadyExistsException;
+import org.example.ecommerce.domain.model.user.exception.UserNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -30,7 +32,6 @@ public class GlobalExceptionHandler {
     }
     @ExceptionHandler({
             UserAlreadyExistsException.class,
-
     })
     public ResponseEntity<ErrorDetails> handleConflictExceptions(
             RuntimeException ex,
@@ -41,6 +42,20 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(buildErrorDetails(request, HttpStatus.CONFLICT, ex.getMessage()));
+    }
+    @ExceptionHandler({
+            UserNotFoundException.class,
+            InvalidPWD.class
+    })
+    public ResponseEntity<ErrorDetails> handleNotFoundExceptions(
+            RuntimeException ex,
+            HttpServletRequest request) {
+
+        log.warn("Conflict Exception: {}", ex.getMessage());
+
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(buildErrorDetails(request, HttpStatus.NOT_FOUND, ex.getMessage()));
     }
     // unified error response - النسخة الأساسية
     private ErrorDetails buildErrorDetails(HttpServletRequest request,

@@ -1,5 +1,6 @@
 package org.example.ecommerce.application.service.authentication.impl;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.ecommerce.application.service.authentication.Authentication;
@@ -9,8 +10,9 @@ import org.example.ecommerce.domain.model.user.User;
 import org.example.ecommerce.domain.model.user.UserRole;
 import org.example.ecommerce.domain.model.user.exception.UserAlreadyExistsException;
 import org.example.ecommerce.domain.model.user.repository.UserRepository;
-import org.example.ecommerce.infrastructure.api.ApiResponse;
-import org.example.ecommerce.infrastructure.dto.user.LoginRequest;
+import org.example.ecommerce.infrastructure.dto.user.LoginRequestWithPhoneNumber;
+import org.example.ecommerce.infrastructure.response.ApiResponse;
+import org.example.ecommerce.infrastructure.dto.user.LoginRequestWithEmail;
 import org.example.ecommerce.infrastructure.dto.user.SignUpRequest;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
@@ -18,7 +20,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
-
 @Service
 @Slf4j
 @RequiredArgsConstructor
@@ -28,13 +29,14 @@ public class AuthenticationImpl implements Authentication {
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final MessageSource messageSource;
-
-
+    private final LoginContext loginContext;
 
     @Override
+    @Transactional
     public Optional<ApiResponse> createCustomer(SignUpRequest request) {
-        log.info("Create Customer Request ");
-        SignUpRequest signUpRequest =new SignUpRequest(
+        log.info("Create Customer Request");
+
+        SignUpRequest signUpRequest = new SignUpRequest(
                 request.userEmail(),
                 request.userPassword(),
                 request.userFullName(),
@@ -43,40 +45,59 @@ public class AuthenticationImpl implements Authentication {
         );
 
         if (userRepository.findByEmail(signUpRequest.userEmail()).isPresent()) {
-            log.error("User with email already exists :{}", signUpRequest.userEmail());
+            log.error("User with email already exists: {}", signUpRequest.userEmail());
             String msg = messageSource.getMessage("user.exists.email", null, LocaleContextHolder.getLocale());
-            throw new UserAlreadyExistsException(msg);        }
-        if(userRepository.findByPhoneNumber( signUpRequest.userPhoneNumber()).isPresent()){
-            log.error("User phone number already exists :{}", signUpRequest.userPhoneNumber());
+            throw new UserAlreadyExistsException(msg);
+        }
+        if (userRepository.findByPhoneNumber(signUpRequest.userPhoneNumber()).isPresent()) {
+            log.error("User phone number already exists: {}", signUpRequest.userPhoneNumber());
             String msg = messageSource.getMessage("user.exists.phone", null, LocaleContextHolder.getLocale());
             throw new UserAlreadyExistsException(msg);
         }
+
         User user = new User();
+        log.info("Initializing User entity...");
         user.setEmail(signUpRequest.userEmail());
+        log.debug("User Email: {}", signUpRequest.userEmail());
         user.setPassword(passwordEncoder.encode(signUpRequest.userPassword()));
         user.setFullName(signUpRequest.userFullName());
+        log.debug("User FullName: {}", signUpRequest.userFullName());
         user.setPhoneNumber(signUpRequest.userPhoneNumber());
+        log.debug("User Phone: {}", signUpRequest.userPhoneNumber());
         user.setImageUrl(signUpRequest.userImageUrl());
+        log.debug("User Image URL: {}", signUpRequest.userImageUrl());
+
         Authority authority = new Authority();
         authority.setRole(UserRole.ROLE_CUSTOMER);
+        authority.setCustomer(user);
         user.getAuthorities().add(authority);
 
         userRepository.save(user);
 
 
-        return Optional.of(new ApiResponse("true","User registered successfully", jwtService.generateToken(user)));
+        userRepository.save(user);
+        log.info("User saved successfully: {}", user.getEmail());
 
+        return Optional.of(new ApiResponse("true", "User registered successfully", jwtService.generateToken(user)));
     }
 
-//TODO
+    // login with email
     @Override
-    public Optional<ApiResponse> login(LoginRequest request) {
-        return Optional.empty();
+    public Optional<ApiResponse> loginWithEmail(LoginRequestWithEmail request) {
+        log.info("Login attempt with email: {}", request.email());
+        return Optional.of(loginContext.login(request.email(), request.password()));
     }
-//TODO
+
+    // login with phone number
+    @Override
+    public Optional<ApiResponse> loginWithPhoneNumber(LoginRequestWithPhoneNumber request) {
+        log.info("Login attempt with phone: {}", request.userPhoneNumber());
+        return Optional.of(loginContext.login(request.userPhoneNumber(), request.password()));
+    }
 
     @Override
-    public Optional<ApiResponse> loginWithOtp(LoginRequest request) {
+    public Optional<ApiResponse> loginWithOtp(LoginRequestWithEmail request) {
+        log.info("Login with OTP is not implemented yet for email: {}", request.email());
         return Optional.empty();
     }
 }
