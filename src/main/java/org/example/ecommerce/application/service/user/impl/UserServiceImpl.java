@@ -1,24 +1,28 @@
 package org.example.ecommerce.application.service.user.impl;
 
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.ecommerce.application.service.user.LoginAttemptService;
 import org.example.ecommerce.application.service.user.UserService;
+import org.example.ecommerce.domain.model.user.FailedLoginAttempt;
 import org.example.ecommerce.domain.model.user.User;
 import org.example.ecommerce.domain.model.user.exception.*;
+import org.example.ecommerce.domain.model.user.repository.FailedLoginAttemptRepository;
 import org.example.ecommerce.domain.model.user.repository.UserRepository;
+import org.example.ecommerce.infrastructure.dto.UserChangeUserPWDDto;
+import org.example.ecommerce.infrastructure.dto.UserUpdateImageProfile;
 import org.example.ecommerce.infrastructure.dto.user.UserProfile;
 import org.example.ecommerce.infrastructure.dto.user.UserUpdateDto;
 import org.example.ecommerce.infrastructure.mapper.UserMapper;
-import org.example.ecommerce.infrastructure.utils.IsEmail;
-import org.example.ecommerce.infrastructure.utils.IsFullName;
-import org.example.ecommerce.infrastructure.utils.IsPhoneNumber;
-import org.example.ecommerce.infrastructure.utils.JwtUtil;
+import org.example.ecommerce.infrastructure.utils.*;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
@@ -31,6 +35,9 @@ public class UserServiceImpl implements UserService {
     private final UserMapper userMapper;
     private final MessageSource messageSource;
     private final JwtUtil jwtUtil;
+    private final ImageUploadUtil  imageUploadUtil;
+    private final LoginAttemptService loginAttemptService ;
+    private final FailedLoginAttemptRepository failedLoginAttemptRepository;
 
     @Override
     public Optional<UserProfile> findByEmail(String email) {
@@ -105,6 +112,95 @@ public class UserServiceImpl implements UserService {
         return updateUser(userDTO, email);
 
     }
+
+    @Override
+    public Boolean deleteImageProfile(String email) {
+        Optional<User> optionalUser = userRepository.findByEmail(email);
+        if (optionalUser.isEmpty()) {
+            return false; // المستخدم غير موجود
+        }
+
+        User user = optionalUser.get();
+        String imageUrl = user.getImageUrl();
+
+        // حذف الصورة من السيرفر/Storage إذا موجودة
+        if (imageUrl != null && !imageUrl.isEmpty()) {
+//            imageUploadUtil.deleteImage(imageUrl);
+            user.setImageUrl(null); // إزالة رابط الصورة من الكائن
+            userRepository.save(user); // تحديث المستخدم
+            return true;
+        }
+
+        return false;
+    }
+
+    @Override
+    @Transactional
+    public Optional<UserUpdateImageProfile> updateProfileImage(String imageUrl, String email) {
+        log.info("Attempting to update user profile image [{}]", email);
+        return userRepository.findByEmail(email)
+                .map(user -> {
+                    log.debug("User found in database: {}", user);
+
+                    log.debug("Updating profile image for user [{}]", email);
+                    user.setImageUrl(imageUrl);
+
+                    User savedUser = userRepository.save(user);
+                    log.info("User [{}] profile image updated successfully", email);
+
+                    // رجّع DTO فيه البيانات الجديدة
+                    return new UserUpdateImageProfile(
+                            savedUser.getImageUrl()
+                    );
+                });
+    }
+
+    @Override
+    @Transactional
+    public Boolean updatePassword(UserChangeUserPWDDto changeUserPWD) {
+        String email = changeUserPWD.email();
+
+        // تحقق من الحظر قبل أي محاولة
+        if (loginAttemptService.isBlocked(email)) {
+            log.warn("User [{}] blocked due to multiple failed attempts", email);
+            throw new RuntimeException("Account blocked due to multiple failed attempts. Try again later.");
+        }
+
+        // جلب المستخدم
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException(
+                        messageSource.getMessage("user.not.found", new Object[]{email}, LocaleContextHolder.getLocale())
+                ));
+
+        // التحقق من كلمة المرور القديمة
+        if (!passwordEncoder.matches(changeUserPWD.password(), user.getPassword())) {
+            // تسجيل محاولة فاشلة
+            FailedLoginAttempt attempt = new FailedLoginAttempt();
+        attempt.setEmail(email);
+        attempt.setAttempts(1);
+        attempt.setLastAttemptTime(LocalDateTime.now());
+
+        failedLoginAttemptRepository.save(attempt);
+
+
+            log.warn("Invalid password attempt for user [{}]", email);
+            throw new UserNotFoundException(
+                    messageSource.getMessage("user.password.invalid", null, LocaleContextHolder.getLocale())
+            );
+        }
+
+        // إعادة تعيين عدد المحاولات بعد نجاح تسجيل الدخول
+        loginAttemptService.resetAttempts(email);
+
+        // تحديث كلمة المرور الجديدة
+        String encodedPassword = passwordEncoder.encode(changeUserPWD.newPassword());
+        user.setPassword(encodedPassword);
+        userRepository.save(user);
+
+        log.info("Password updated successfully for user: {}", email);
+        return true;
+    }
+
 
 
     private Optional<UserProfile> updateUser(UserUpdateDto userDTO, String email) {

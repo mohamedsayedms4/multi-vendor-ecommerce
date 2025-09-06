@@ -2,6 +2,8 @@ package org.example.ecommerce.application.service.user;
 
 
 
+import org.example.ecommerce.infrastructure.dto.UserChangeUserPWDDto;
+import org.example.ecommerce.infrastructure.dto.UserUpdateImageProfile;
 import org.example.ecommerce.infrastructure.dto.user.UserUpdateDto;
 import org.example.ecommerce.infrastructure.dto.user.UserProfile;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -31,7 +33,8 @@ public interface UserService {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     Optional<UserProfile> updateUserById(UserUpdateDto userDTO, Long id);
 
-    // Optional<UserDTO> updateProfileImage(String imageUrl, String email);
+    Boolean deleteImageProfile(String email);
+     Optional<UserUpdateImageProfile> updateProfileImage(String imageUrl, String email);
     // void deleteUser(Long id);
-    // Boolean updatePassword(ChangeUserPWD changeUserPWD);
+     Boolean updatePassword(UserChangeUserPWDDto changeUserPWD);
 }

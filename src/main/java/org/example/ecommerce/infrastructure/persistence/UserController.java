@@ -7,13 +7,18 @@ import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.ecommerce.application.service.user.UserService;
+import org.example.ecommerce.domain.model.user.exception.EmailIsNotValid;
+import org.example.ecommerce.infrastructure.dto.UserChangeUserPWDDto;
+import org.example.ecommerce.infrastructure.dto.UserUpdateImageProfile;
 import org.example.ecommerce.infrastructure.dto.user.UserProfile;
 import org.example.ecommerce.infrastructure.dto.user.UserUpdateDto;
+import org.example.ecommerce.infrastructure.utils.ImageUploadUtil;
 import org.example.ecommerce.infrastructure.utils.JwtUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Map;
 import java.util.Optional;
@@ -26,6 +31,7 @@ public class UserController {
 
     private final UserService userService;
     private final JwtUtil jwtUtil;
+    private final ImageUploadUtil imageUploadUtil;
 
     @PostMapping("/jwt")
     public ResponseEntity<?> getUserProfileByJwt(
@@ -106,5 +112,86 @@ public class UserController {
 
     }
 
+    @PutMapping("/update/image")
+    public ResponseEntity<?> updateImageUrl(
+            @RequestPart(value = "imageProfile", required = true) MultipartFile imageProfile,
+            @RequestHeader(value = "Authorization", required = false) String jwt
+    ){
+        log.info("Received request to update user: {}", imageProfile);
+
+        if (jwt == null || jwt.trim().isEmpty()) {
+            log.warn("Authorization header is missing");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Authorization header is missing"));
+        }
+
+        String email = jwtUtil.extractEmailFromJwt(jwt);
+        log.debug("Extracted email from JWT: {}", email);
+
+        // رفع الصور
+        String imageUrl = null;
+        if (imageProfile != null && !imageProfile.isEmpty()) {
+            imageUrl = imageUploadUtil.saveImage(imageProfile);
+        }
+        Optional<UserUpdateImageProfile> updatedUser = userService.updateProfileImage(imageUrl, email);
+        if (updatedUser.isPresent()) {
+            log.info("User with email [{}] updated successfully", email);
+            return ResponseEntity.ok(updatedUser.get());
+        } else {
+            log.error("Failed to update user with email [{}]", email);
+            return ResponseEntity.badRequest().body("User update failed");
+        }
+    }
+
+    @DeleteMapping("/del/image-profile")
+    public ResponseEntity<?> deleteImageProfile(
+            @RequestParam(required = false) String email,
+            @RequestHeader(value = "Authorization", required = false) String jwt){
+
+        log.info("Received request to delete profile image with email [{}] or JWT", email);
+        if ((email == null || email.isBlank()) && (jwt == null || jwt.isBlank())) {
+            log.warn("Neither email nor JWT provided");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "You must provide either email or JWT"));
+        }
+        if ((email == null || email.isBlank()) && jwt != null && !jwt.isBlank()) {
+            email = jwtUtil.extractEmailFromJwt(jwt);
+            log.debug("Extracted email from JWT: {}", email);
+        }
+
+        Boolean deleted = userService.deleteImageProfile(email);
+        if (deleted) {
+            log.info("Profile image for [{}] deleted successfully", email);
+            return ResponseEntity.ok(Map.of("message", "Profile image deleted successfully"));
+        } else {
+            log.warn("No profile image found for [{}] or deletion failed", email);
+            return ResponseEntity.badRequest().body(Map.of("error", "Profile image deletion failed or not found"));
+        }
+    }
+    @PutMapping("/changePwd")
+    public ResponseEntity<?> changePassword(
+            @Valid @RequestBody UserChangeUserPWDDto changeUserPWD,
+            @RequestHeader(value = "Authorization", required = false) String jwt
+    ){
+        log.info("Received request to delete user with jwt: {}", jwt);
+
+        if (jwt == null || jwt.trim().isEmpty()) {
+            log.warn("Authorization header is missing");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Authorization header is missing"));
+        }
+
+        String email = jwtUtil.extractEmailFromJwt(jwt);
+        log.debug("Extracted email from JWT: {}", email);
+
+        if(!email.equals(changeUserPWD.email())){
+            throw new EmailIsNotValid("Invalid email address");
+        }
+        userService.updatePassword(changeUserPWD);
+        log.info("User with email [{}] updated successfully", changeUserPWD.email());
+        return ResponseEntity.ok(Map.of("message", "Password changed successfully"));
+    }
+
 
 }
+
