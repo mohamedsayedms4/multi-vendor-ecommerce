@@ -3,6 +3,7 @@ package org.example.ecommerce.infrastructure.exception;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
+import org.example.ecommerce.domain.common.exception.FailedLoginAttempt;
 import org.example.ecommerce.domain.model.user.exception.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -76,6 +77,7 @@ public class GlobalExceptionHandler {
             EmailIsNotValid.class,
             PhoneNumberIsNotValid.class,
             NameIsNotVlild.class,
+            FailedLoginAttempt.class
     })
     public ResponseEntity<ErrorDetails> handleBadRequestExceptions(
             RuntimeException ex,

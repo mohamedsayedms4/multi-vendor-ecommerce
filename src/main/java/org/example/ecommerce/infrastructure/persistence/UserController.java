@@ -1,11 +1,9 @@
 package org.example.ecommerce.infrastructure.persistence;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.example.ecommerce.application.service.FailedLogin.LoginAttemptService;
 import org.example.ecommerce.application.service.user.UserService;
 import org.example.ecommerce.domain.model.user.exception.EmailIsNotValid;
 import org.example.ecommerce.infrastructure.dto.UserChangeUserPWDDto;
@@ -16,12 +14,13 @@ import org.example.ecommerce.infrastructure.utils.ImageUploadUtil;
 import org.example.ecommerce.infrastructure.utils.JwtUtil;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.Map;
 import java.util.Optional;
+
+
 
 @RestController
 @RequestMapping("/api/v1/users")
@@ -32,7 +31,7 @@ public class UserController {
     private final UserService userService;
     private final JwtUtil jwtUtil;
     private final ImageUploadUtil imageUploadUtil;
-
+    private final LoginAttemptService loginAttemptService;
     @PostMapping("/jwt")
     public ResponseEntity<?> getUserProfileByJwt(
             @RequestHeader(value = "Authorization", required = false) String jwt) {
@@ -183,6 +182,7 @@ public class UserController {
 
         String email = jwtUtil.extractEmailFromJwt(jwt);
         log.debug("Extracted email from JWT: {}", email);
+        loginAttemptService.loginFailed(email);
 
         if(!email.equals(changeUserPWD.email())){
             throw new EmailIsNotValid("Invalid email address");
@@ -193,5 +193,33 @@ public class UserController {
     }
 
 
+    @DeleteMapping("/del")
+    public ResponseEntity<?> deleteUser(
+            @RequestHeader(value = "Authorization", required = false) String jwt
+    ) {
+        log.info("Received request to delete user with jwt: {}", jwt);
+
+        if (jwt == null || jwt.trim().isEmpty()) {
+            log.warn("Authorization header is missing");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(Map.of("error", "Authorization header is missing"));
+        }
+
+        String email = jwtUtil.extractEmailFromJwt(jwt);
+        log.debug("Extracted email from JWT: {}", email);
+
+        Long id = userService.userId(email);
+
+
+        if (id == null) {
+            log.error("Invalid email: {}", email);
+            return ResponseEntity.badRequest().body(Map.of("error", "Invalid email address"));
+        }
+
+        userService.deleteUser(id);
+        log.info("User with id [{}] deleted successfully", id);
+
+        return ResponseEntity.ok(Map.of("message", "User deleted successfully"));
+    }
 }
 
