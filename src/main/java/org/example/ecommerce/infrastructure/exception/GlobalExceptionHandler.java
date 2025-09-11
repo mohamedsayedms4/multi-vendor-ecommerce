@@ -7,6 +7,8 @@ import org.example.ecommerce.domain.common.exception.FailedLoginAttempt;
 import org.example.ecommerce.domain.common.exception.INTERNAL_SERVER_ERROR;
 import org.example.ecommerce.domain.common.exception.LogoIsRequired;
 import org.example.ecommerce.domain.common.exception.UnauthorizedException;
+import org.example.ecommerce.domain.model.category.exception.CategoryAlreadyExistsException;
+import org.example.ecommerce.domain.model.category.exception.CategoryNotFoundException;
 import org.example.ecommerce.domain.model.user.exception.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -50,6 +52,7 @@ public class GlobalExceptionHandler {
             UserAlreadyExistsException.class,
             PhoneNumberAlreadyExists.class,
             EmailAlreadyExists.class,
+            CategoryAlreadyExistsException.class
     })
     public ResponseEntity<ErrorDetails> handleConflictExceptions(
             RuntimeException ex,
@@ -63,7 +66,7 @@ public class GlobalExceptionHandler {
     }
     @ExceptionHandler({
             UserNotFoundException.class,
-            InvalidPWD.class
+            CategoryNotFoundException.class
     })
     public ResponseEntity<ErrorDetails> handleNotFoundExceptions(
             RuntimeException ex,
@@ -80,7 +83,8 @@ public class GlobalExceptionHandler {
             EmailIsNotValid.class,
             PhoneNumberIsNotValid.class,
             NameIsNotVlild.class,
-            LogoIsRequired.class
+            LogoIsRequired.class,
+            InvalidPWD.class
 
     })
     public ResponseEntity<ErrorDetails> handleBadRequestExceptions(
