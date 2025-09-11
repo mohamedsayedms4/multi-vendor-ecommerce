@@ -50,6 +50,7 @@ public class JwtServiceImpl implements JwtService {
         String token = Jwts.builder()
                 .setIssuer("Masala")
                 .setSubject(user.getEmail())
+                .claim("id", user.getId())
                 .claim("username", user.getEmail())
                 .claim("authorities", authorities)
                 .setIssuedAt(issuedAt)

@@ -17,11 +17,15 @@ public abstract class BaseEntity extends BaseIdEntity{
 
     protected LocalDateTime updatedAt;
 
+    @Version
+    private Long version;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = createdAt;
     }
+
 
     @PreUpdate
     protected void onUpdate() {

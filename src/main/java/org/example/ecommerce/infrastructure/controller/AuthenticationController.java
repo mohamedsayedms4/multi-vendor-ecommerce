@@ -1,4 +1,4 @@
-package org.example.ecommerce.infrastructure.persistence;
+package org.example.ecommerce.infrastructure.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

@@ -1,17 +1,20 @@
-package org.example.ecommerce.infrastructure.persistence;
+package org.example.ecommerce.infrastructure.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.ecommerce.application.service.FailedLogin.LoginAttemptService;
 import org.example.ecommerce.application.service.user.UserService;
+import org.example.ecommerce.domain.common.exception.FailedLoginAttempt;
 import org.example.ecommerce.domain.model.user.exception.EmailIsNotValid;
-import org.example.ecommerce.infrastructure.dto.UserChangeUserPWDDto;
-import org.example.ecommerce.infrastructure.dto.UserUpdateImageProfile;
+import org.example.ecommerce.infrastructure.dto.user.UserChangeUserPWDDto;
+import org.example.ecommerce.infrastructure.dto.user.UserUpdateImageProfile;
 import org.example.ecommerce.infrastructure.dto.user.UserProfile;
 import org.example.ecommerce.infrastructure.dto.user.UserUpdateDto;
 import org.example.ecommerce.infrastructure.utils.ImageUploadUtil;
 import org.example.ecommerce.infrastructure.utils.JwtUtil;
+import org.springframework.context.MessageSource;
+import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -32,6 +35,7 @@ public class UserController {
     private final JwtUtil jwtUtil;
     private final ImageUploadUtil imageUploadUtil;
     private final LoginAttemptService loginAttemptService;
+    private final MessageSource messageSource;
     @PostMapping("/jwt")
     public ResponseEntity<?> getUserProfileByJwt(
             @RequestHeader(value = "Authorization", required = false) String jwt) {
@@ -180,12 +184,20 @@ public class UserController {
                     .body(Map.of("error", "Authorization header is missing"));
         }
 
+
         String email = jwtUtil.extractEmailFromJwt(jwt);
         log.debug("Extracted email from JWT: {}", email);
+        if (loginAttemptService.isBlocked(email)) {
+            throw new FailedLoginAttempt(
+                    messageSource.getMessage("block.request", new Object[]{email}, LocaleContextHolder.getLocale()));
+        }
         loginAttemptService.loginFailed(email);
 
         if(!email.equals(changeUserPWD.email())){
-            throw new EmailIsNotValid("Invalid email address");
+            throw new EmailIsNotValid(
+                    messageSource.getMessage("invalid.email.request", new Object[]{email},
+                            LocaleContextHolder.getLocale()));
+
         }
         userService.updatePassword(changeUserPWD);
         log.info("User with email [{}] updated successfully", changeUserPWD.email());

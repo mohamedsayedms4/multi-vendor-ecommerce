@@ -90,6 +90,7 @@ public class ProjectSecurityConfig {
                 .authorizeHttpRequests(requests -> requests
                         .requestMatchers("/api/v1/auth/**","/test/save").permitAll()
                         .requestMatchers("/api/v1/user/**").authenticated()
+                        .requestMatchers("/api/v1/sellers/**").authenticated()
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
 
                         .anyRequest().authenticated()

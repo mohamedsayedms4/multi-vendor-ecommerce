@@ -9,6 +9,7 @@ import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
 import org.example.ecommerce.domain.common.Address;
 import org.example.ecommerce.domain.common.BaseEntity;
+import org.example.ecommerce.domain.model.seller.Seller;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -18,7 +19,6 @@ import java.util.Set;
 @NoArgsConstructor
 @Entity
 @Table(name = "users")
-@EqualsAndHashCode(callSuper = true)
 public class User extends BaseEntity {
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
@@ -39,6 +39,11 @@ public class User extends BaseEntity {
     private Address pickupAddress = new Address();
 
     private String imageUrl;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+
+    private Seller seller;
 
 
 }

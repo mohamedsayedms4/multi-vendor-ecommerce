@@ -51,4 +51,5 @@ public class FailedLoginAttempt {
      */
     private LocalDateTime lastAttemptTime;
 
+
 }

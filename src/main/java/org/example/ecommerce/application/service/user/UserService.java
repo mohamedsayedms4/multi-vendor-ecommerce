@@ -1,7 +1,7 @@
 package org.example.ecommerce.application.service.user;
 
-import org.example.ecommerce.infrastructure.dto.UserChangeUserPWDDto;
-import org.example.ecommerce.infrastructure.dto.UserUpdateImageProfile;
+import org.example.ecommerce.infrastructure.dto.user.UserChangeUserPWDDto;
+import org.example.ecommerce.infrastructure.dto.user.UserUpdateImageProfile;
 import org.example.ecommerce.infrastructure.dto.user.UserUpdateDto;
 import org.example.ecommerce.infrastructure.dto.user.UserProfile;
 import org.springframework.security.access.prepost.PreAuthorize;

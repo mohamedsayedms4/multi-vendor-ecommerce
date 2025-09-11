@@ -4,6 +4,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.example.ecommerce.domain.common.exception.FailedLoginAttempt;
+import org.example.ecommerce.domain.common.exception.INTERNAL_SERVER_ERROR;
+import org.example.ecommerce.domain.common.exception.LogoIsRequired;
+import org.example.ecommerce.domain.common.exception.UnauthorizedException;
 import org.example.ecommerce.domain.model.user.exception.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -77,7 +80,8 @@ public class GlobalExceptionHandler {
             EmailIsNotValid.class,
             PhoneNumberIsNotValid.class,
             NameIsNotVlild.class,
-            FailedLoginAttempt.class
+            LogoIsRequired.class
+
     })
     public ResponseEntity<ErrorDetails> handleBadRequestExceptions(
             RuntimeException ex,
@@ -88,6 +92,57 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(buildErrorDetails(request, HttpStatus.BAD_REQUEST, ex.getMessage()));
     }
+
+
+
+    @ExceptionHandler({
+            UnauthorizedException.class
+    })
+    public ResponseEntity<ErrorDetails> handleUnauthorized(
+            RuntimeException ex ,
+            HttpServletRequest request
+    ){
+        log.warn(" Unauthorized: {}", ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(buildErrorDetails(request, HttpStatus.UNAUTHORIZED, ex.getMessage()));
+    }
+    @ExceptionHandler({
+            FailedLoginAttempt.class
+    })
+    public ResponseEntity<ErrorDetails> handleTooManyExceptions(
+            RuntimeException ex ,
+            HttpServletRequest request
+    ){
+        log.warn("Too MAny Requests: {}", ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.TOO_MANY_REQUESTS)
+                .body(buildErrorDetails(request, HttpStatus.TOO_MANY_REQUESTS, ex.getMessage()));
+    }
+    @ExceptionHandler({
+            INTERNAL_SERVER_ERROR.class
+    })
+    public ResponseEntity<ErrorDetails> handleInternalServerErrors(
+            RuntimeException ex ,
+            HttpServletRequest request
+    ){
+        log.warn("INTERNAL_SERVER_ERROR: {}", ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(buildErrorDetails(request, HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage()));
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorDetails> handleAllExceptions(
+            Exception ex,
+            HttpServletRequest request
+    ) {
+        log.error("Unexpected error: {}", ex.getMessage(), ex);
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(buildErrorDetails(request, HttpStatus.INTERNAL_SERVER_ERROR, "Something went wrong"));
+    }
+
     // unified error response - النسخة الأساسية
     private ErrorDetails buildErrorDetails(HttpServletRequest request,
                                            HttpStatus status,

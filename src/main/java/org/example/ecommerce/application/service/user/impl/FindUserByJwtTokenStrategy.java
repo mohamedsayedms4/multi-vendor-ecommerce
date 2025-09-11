@@ -18,8 +18,8 @@ public class FindUserByJwtTokenStrategy implements GetUserStrategy {
     private final UserMapper userMapper;
     @Override
     public Optional<UserProfile> getUser(String input) throws UserNotFoundException {
-        String email = jwtUtil.extractEmailFromJwt(input);
-        return  userRepository.findByEmail(email)
+        Long id = jwtUtil.extractUserIdFromJwt(input);
+        return  userRepository.findById(id)
                 .map(userMapper::toUserProfile);
     }
 }

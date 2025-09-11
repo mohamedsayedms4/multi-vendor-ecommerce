@@ -6,6 +6,7 @@ import org.example.ecommerce.infrastructure.dto.authority.AuthorityDTO;
 import java.util.Set;
 
 public record UserProfile (
+        Long id,
         String email,
         String fullName,
         String phoneNumber,

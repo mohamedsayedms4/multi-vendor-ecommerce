@@ -31,3 +31,10 @@ build/
 
 ### VS Code ###
 .vscode/
+
+
+# Ignore Admin service implementation classes
+src/main/java/org/example/ecommerce/application/service/admin/
+
+# Ignore Admin controllers
+src/main/java/org/example/ecommerce/infrastructure/controller/AdminController.java

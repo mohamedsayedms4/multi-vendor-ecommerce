@@ -9,8 +9,8 @@ import org.example.ecommerce.domain.common.exception.FailedLoginAttempt;
 import org.example.ecommerce.domain.model.user.User;
 import org.example.ecommerce.domain.model.user.exception.*;
 import org.example.ecommerce.domain.model.user.repository.UserRepository;
-import org.example.ecommerce.infrastructure.dto.UserChangeUserPWDDto;
-import org.example.ecommerce.infrastructure.dto.UserUpdateImageProfile;
+import org.example.ecommerce.infrastructure.dto.user.UserChangeUserPWDDto;
+import org.example.ecommerce.infrastructure.dto.user.UserUpdateImageProfile;
 import org.example.ecommerce.infrastructure.dto.user.UserProfile;
 import org.example.ecommerce.infrastructure.dto.user.UserUpdateDto;
 import org.example.ecommerce.infrastructure.mapper.UserMapper;
@@ -213,14 +213,11 @@ public class UserServiceImpl implements UserService {
     public Boolean updatePassword(UserChangeUserPWDDto changeUserPWD) {
         String email = changeUserPWD.email();
 
-        if (loginAttemptService.isBlocked(email)) {
-            throw new FailedLoginAttempt(
-                    messageSource.getMessage("block.request", new Object[]{email}, LocaleContextHolder.getLocale()));
-        }
+
 
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UserNotFoundException(
-                        messageSource.getMessage("user.not.found", new Object[]{email}, LocaleContextHolder.getLocale())));
+                        messageSource.getMessage("user.notfound.email", new Object[]{email}, LocaleContextHolder.getLocale())));
 
         if (!passwordEncoder.matches(changeUserPWD.password(), user.getPassword())) {
             throw new InvalidPWD(
@@ -279,7 +276,9 @@ public class UserServiceImpl implements UserService {
 
         if (userRepository.findByEmail(userDTO.email()).isPresent()) {
             throw new EmailAlreadyExists(
-                    messageSource.getMessage("user.exists.email", new Object[]{userDTO.email()}, LocaleContextHolder.getLocale()));
+                    messageSource.getMessage("user.exists.email",
+                            new Object[]{userDTO.email()},
+                            LocaleContextHolder.getLocale()));
         }
 
         if (userRepository.existsByPhoneNumber(userDTO.phoneNumber())) {
@@ -292,7 +291,7 @@ public class UserServiceImpl implements UserService {
                     if (userDTO.email() != null) {
                         if (!IsEmail.isEmail(userDTO.email())) {
                             throw new EmailIsNotValid(
-                                    messageSource.getMessage("user.email.invalid", new Object[]{userDTO.phoneNumber()}, LocaleContextHolder.getLocale()));
+                                    messageSource.getMessage("user.email.invalid", new Object[]{userDTO.email()}, LocaleContextHolder.getLocale()));
                         }
                         user.setEmail(userDTO.email());
                     }

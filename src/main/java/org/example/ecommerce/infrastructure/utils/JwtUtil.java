@@ -50,4 +50,30 @@ public class JwtUtil {
         }
         return jwt;
     }
+
+    public Long extractUserIdFromJwt(String jwt) {
+        Claims claims = getClaims(jwt);
+        Object idObj = claims.get("id"); // أو "userId" حسب الـ JWT
+        if (idObj == null) {
+            throw new IllegalArgumentException("No userId found in JWT");
+        }
+        try {
+            return Long.valueOf(idObj.toString());
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Invalid userId in JWT");
+        }
+    }
+    private Claims getClaims(String jwt) {
+        jwt = cleanJwtToken(jwt);
+        if (jwt == null || jwt.trim().isEmpty()) {
+            throw new IllegalArgumentException("JWT is null or empty");
+        }
+        SecretKey key = Keys.hmacShaKeyFor(jwtSecret.getBytes(StandardCharsets.UTF_8));
+        return Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(jwt)
+                .getPayload();
+    }
 }
+
