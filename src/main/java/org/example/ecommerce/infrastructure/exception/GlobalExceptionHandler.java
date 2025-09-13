@@ -13,6 +13,7 @@ import org.example.ecommerce.domain.model.product.exception.ProductNotFoundExcep
 import org.example.ecommerce.domain.model.user.exception.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -136,6 +137,18 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                 .body(buildErrorDetails(request, HttpStatus.INTERNAL_SERVER_ERROR, ex.getMessage()));
+    }
+    @ExceptionHandler({
+            AuthorizationDeniedException.class
+    })
+    public ResponseEntity<ErrorDetails> handleAccessDeniedException(
+            RuntimeException ex ,
+            HttpServletRequest request
+    ){
+        log.warn("INTERNAL_SERVER_ERROR: {}", ex.getMessage());
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(buildErrorDetails(request, HttpStatus.FORBIDDEN, ex.getMessage()));
     }
 
     @ExceptionHandler(Exception.class)
