@@ -18,4 +18,11 @@ public interface SellerMapper {
         @Mapping(source = "user.imageUrl", target = "imageUrl")
         SellerProfile toSellerProfile(Seller seller);
 
+        @Mapping(source = "email", target = "user.email")
+        @Mapping(source = "fullName", target = "user.fullName")
+        @Mapping(source = "phoneNumber", target = "user.phoneNumber")
+        @Mapping(source = "authorities", target = "user.authorities")
+        @Mapping(source = "pickupAddress", target = "user.pickupAddress")
+        @Mapping(source = "imageUrl", target = "user.imageUrl")
+        Seller toSeller(SellerProfile sellerProfile);
 }

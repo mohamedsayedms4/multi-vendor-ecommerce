@@ -17,21 +17,28 @@ public abstract class BaseEntity extends BaseIdEntity{
 
     protected LocalDateTime updatedAt;
 
-    @Version
-    private Long version;
 
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = createdAt;
+        onPrePersist(); // hook method
     }
 
 
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
+        onPreUpdate(); // hook method
     }
 
+    protected void onPrePersist() {
+        // يمكن للكلاسات المشتقة تعديل هذه الدالة
+    }
+
+    protected void onPreUpdate() {
+        // يمكن للكلاسات المشتقة تعديل هذه الدالة
+    }
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;

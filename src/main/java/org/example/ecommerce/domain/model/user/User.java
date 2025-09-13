@@ -19,6 +19,7 @@ import java.util.Set;
 @NoArgsConstructor
 @Entity
 @Table(name = "users")
+@Inheritance(strategy = InheritanceType.JOINED)
 public class User extends BaseEntity {
 
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
@@ -45,5 +46,5 @@ public class User extends BaseEntity {
 
     private Seller seller;
 
-
+    private String fcmToken;
 }

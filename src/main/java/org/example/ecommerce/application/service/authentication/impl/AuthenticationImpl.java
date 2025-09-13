@@ -100,4 +100,11 @@ public class AuthenticationImpl implements Authentication {
         log.info("Login with OTP is not implemented yet for email: {}", request.email());
         return Optional.empty();
     }
+
+    @Override
+    public String getFcmTokenByPhone(String phoneNumber) {
+        return userRepository.findByPhoneNumber(phoneNumber)
+                .map(User::getFcmToken)
+                .orElse(null);
+    }
 }

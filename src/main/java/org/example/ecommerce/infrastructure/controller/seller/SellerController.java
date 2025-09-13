@@ -1,13 +1,12 @@
 package org.example.ecommerce.infrastructure.controller.seller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.example.ecommerce.application.service.seller.SellerService;
 import org.example.ecommerce.application.service.user.UserService;
 import org.example.ecommerce.domain.common.exception.INTERNAL_SERVER_ERROR;
-import org.example.ecommerce.domain.common.exception.LogoIsRequired;
+import org.example.ecommerce.domain.common.exception.ImageIsRequired;
 import org.example.ecommerce.domain.common.exception.UnauthorizedException;
 import org.example.ecommerce.domain.model.user.exception.UserNotFoundException;
 import org.example.ecommerce.infrastructure.dto.seller.*;
@@ -33,7 +32,7 @@ public class SellerController {
 
     @PostMapping("")
     public ResponseEntity<?> createSeller(
-            @RequestPart("seller_details") String dto,
+            @RequestPart("seller_details") BecomeASellerWithoutLogoAndBannerDto becomeASellerDto,
             @RequestHeader(value = "Authorization", required = false) String jwt,
             @RequestPart(value = "logo" ) MultipartFile logo,
             @RequestPart(value = "banner", required = false) MultipartFile banner
@@ -46,14 +45,14 @@ public class SellerController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of("error", "User not found"));
         }
-        ObjectMapper objectMapper = new ObjectMapper();
-        BecomeASellerWithoutLogoAndBannerDto becomeASellerDto;
-        try {
-            becomeASellerDto = objectMapper.readValue(dto, BecomeASellerWithoutLogoAndBannerDto.class);
-        } catch (JsonProcessingException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(Map.of("error", "صيغة البيانات غير صحيحة: " + e.getMessage()));
-        }
+//        ObjectMapper objectMapper = new ObjectMapper();
+//        BecomeASellerWithoutLogoAndBannerDto becomeASellerDto;
+//        try {
+//            becomeASellerDto = objectMapper.readValue(dto, BecomeASellerWithoutLogoAndBannerDto.class);
+//        } catch (JsonProcessingException e) {
+//            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+//                    .body(Map.of("error", "صيغة البيانات غير صحيحة: " + e.getMessage()));
+//        }
 
 // دلوقتي المتغير متاح هنا
 
@@ -61,7 +60,7 @@ public class SellerController {
 
         String logoUrl = null;
         if (logo.isEmpty() || logo == null) {
-            throw new  LogoIsRequired("logo is required");
+            throw new ImageIsRequired("logo is required");
         }else {
             logoUrl = imageUploadUtil.saveImage(logo);
 

@@ -5,10 +5,11 @@ import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.example.ecommerce.domain.common.exception.FailedLoginAttempt;
 import org.example.ecommerce.domain.common.exception.INTERNAL_SERVER_ERROR;
-import org.example.ecommerce.domain.common.exception.LogoIsRequired;
+import org.example.ecommerce.domain.common.exception.ImageIsRequired;
 import org.example.ecommerce.domain.common.exception.UnauthorizedException;
 import org.example.ecommerce.domain.model.category.exception.CategoryAlreadyExistsException;
 import org.example.ecommerce.domain.model.category.exception.CategoryNotFoundException;
+import org.example.ecommerce.domain.model.product.exception.ProductNotFoundException;
 import org.example.ecommerce.domain.model.user.exception.*;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -66,7 +67,8 @@ public class GlobalExceptionHandler {
     }
     @ExceptionHandler({
             UserNotFoundException.class,
-            CategoryNotFoundException.class
+            CategoryNotFoundException.class,
+            ProductNotFoundException.class
     })
     public ResponseEntity<ErrorDetails> handleNotFoundExceptions(
             RuntimeException ex,
@@ -83,7 +85,7 @@ public class GlobalExceptionHandler {
             EmailIsNotValid.class,
             PhoneNumberIsNotValid.class,
             NameIsNotVlild.class,
-            LogoIsRequired.class,
+            ImageIsRequired.class,
             InvalidPWD.class
 
     })

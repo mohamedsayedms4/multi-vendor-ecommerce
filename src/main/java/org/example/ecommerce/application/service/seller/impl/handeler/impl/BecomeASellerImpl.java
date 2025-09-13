@@ -15,7 +15,9 @@ import org.example.ecommerce.domain.model.user.UserRole;
 import org.example.ecommerce.domain.model.user.repository.UserRepository;
 import org.example.ecommerce.infrastructure.dto.seller.BecomeASellerDto;
 import org.example.ecommerce.infrastructure.dto.seller.SellerProfile;
+import org.example.ecommerce.infrastructure.event.NewSellerRegisteredEvent;
 import org.example.ecommerce.infrastructure.mapper.SellerMapper;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Component;
 
 import java.util.Optional;
@@ -33,6 +35,8 @@ public class BecomeASellerImpl implements BecomeASeller {
     private final SellerRepository sellerRepository;
     private final UserRepository userRepository;
     private final SellerMapper sellerMapper;
+    private final ApplicationEventPublisher eventPublisher;
+
 
     /**
      * Converts a user to a seller or updates existing seller information.
@@ -79,6 +83,8 @@ public class BecomeASellerImpl implements BecomeASeller {
             }
 
             Seller saved = sellerRepository.save(seller);
+            eventPublisher.publishEvent(new NewSellerRegisteredEvent(this, saved));
+
 
             return Optional.of(sellerMapper.toSellerProfile(saved));
 

@@ -33,18 +33,22 @@ public class ImageUploadUtil {
 
         try {
             for (MultipartFile file : images) {
+                log.info("Uploading image: {}", file.getOriginalFilename());
                 Map uploadResult = cloudinary.uploader().upload(file.getBytes(),
                         ObjectUtils.asMap("folder", "remotly_ecommerce"));
                 String url = (String) uploadResult.get("secure_url");
                 imageUrls.add(url);
+                log.info("Image uploaded successfully: {}", url);
             }
         } catch (IOException e) {
             log.error("Failed to upload images to Cloudinary", e);
             throw new RuntimeException("Failed to upload images", e);
         }
 
+        log.info("All images uploaded: {}", imageUrls);
         return imageUrls;
     }
+
     /**
      * Save a single image to Cloudinary and return its URL.
      *

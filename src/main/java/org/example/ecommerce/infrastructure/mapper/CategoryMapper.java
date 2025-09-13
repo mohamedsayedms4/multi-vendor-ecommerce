@@ -1,6 +1,7 @@
 package org.example.ecommerce.infrastructure.mapper;
 
 import org.example.ecommerce.domain.model.category.Category;
+import org.example.ecommerce.infrastructure.dto.category.CategoryAdminDto;
 import org.example.ecommerce.infrastructure.dto.category.CreateCategoryWithoutIconDto;
 import org.mapstruct.Mapper;
 
@@ -8,4 +9,7 @@ import org.mapstruct.Mapper;
 public interface CategoryMapper {
 
     CreateCategoryWithoutIconDto toCreateCategoryDto(Category category);
+
+
+    CategoryAdminDto toCategoryAdminDto(Category category);
 }

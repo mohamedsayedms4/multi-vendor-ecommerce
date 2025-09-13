@@ -16,5 +16,6 @@ public interface Authentication {
     Optional<ApiResponse> loginWithOtp(LoginRequestWithEmail request);
 //    AuthResponse verifyOtp(OtpVerificationRequest request);
 
+    String getFcmTokenByPhone(String phoneNumber);
 
 }

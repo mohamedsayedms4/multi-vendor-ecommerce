@@ -35,14 +35,14 @@ public class AuthenticationController {
 
     @PostMapping("/sign-up")
     public ResponseEntity<ApiResponse> signup(
-            @Valid @RequestPart(value = "data" ,required = true) String request,
+            @Valid @RequestPart(value = "data" ,required = true) SignUpRequestWithoutImageProfille signUpRequest,
             @RequestPart(value = "image", required = false) MultipartFile image) throws JsonProcessingException {
 
-        log.info("user_details : {} + image :{}", request ,image);
+        log.info("user_details : {} + image :{}", signUpRequest ,image);
 
-        ObjectMapper objectMapper = new ObjectMapper();
-        SignUpRequestWithoutImageProfille signUpRequest =
-                objectMapper.readValue(request, SignUpRequestWithoutImageProfille.class);
+//        ObjectMapper objectMapper = new ObjectMapper();
+//        SignUpRequestWithoutImageProfille signUpRequest =
+//                objectMapper.readValue(request, SignUpRequestWithoutImageProfille.class);
 
         Set<ConstraintViolation<SignUpRequestWithoutImageProfille>> violations = validator.validate(signUpRequest);
         if (!violations.isEmpty()) {

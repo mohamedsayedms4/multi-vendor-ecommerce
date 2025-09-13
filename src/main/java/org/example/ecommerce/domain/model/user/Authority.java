@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import org.example.ecommerce.domain.model.admin.Admin;
 
 @Entity
 @Setter
@@ -21,4 +22,9 @@ public class Authority {
     @JsonBackReference
     @JoinColumn(name="customer_id")
     private User customer;
+
+    @ManyToOne
+    @JoinColumn(name = "admin_id")
+    @JsonBackReference
+    private Admin admin;
 }

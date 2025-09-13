@@ -92,6 +92,9 @@ public class ProjectSecurityConfig {
                         .requestMatchers("/api/v1/user/**").authenticated()
                         .requestMatchers("/api/v1/sellers/**").authenticated()
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
+                                .requestMatchers("api/v1/admin/notifications/**").hasRole("ADMIN")
+                        .requestMatchers("/ws/**", "/ws", "/topic/**", "/app/**").permitAll()
+
 
                         .anyRequest().authenticated()
 
