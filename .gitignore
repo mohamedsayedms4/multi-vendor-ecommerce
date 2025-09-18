@@ -1,58 +1,59 @@
-HELP.md
-target/
-.mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
+    HELP.md
+    target/
+    .mvn/wrapper/maven-wrapper.jar
+    !**/src/main/**/target/
+    !**/src/test/**/target/
 
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
+    ### STS ###
+    .apt_generated
+    .classpath
+    .factorypath
+    .project
+    .settings
+    .springBeans
+    .sts4-cache
 
-### IntelliJ IDEA ###
-.idea
-*.iws
-*.iml
-*.ipr
+    ### IntelliJ IDEA ###
+    .idea
+    *.iws
+    *.iml
+    *.ipr
 
-### NetBeans ###
-/nbproject/private/
-/nbbuild/
-/dist/
-/nbdist/
-/.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
+    ### NetBeans ###
+    /nbproject/private/
+    /nbbuild/
+    /dist/
+    /nbdist/
+    /.nb-gradle/
+    build/
+    !**/src/main/**/build/
+    !**/src/test/**/build/
 
-### VS Code ###
-.vscode/
+    ### VS Code ###
+    .vscode/
+
+    /src/main/resources/firebase-service-account.json
+    #/src/main/java/org/example/ecommerce/infrastructure/listener/
+    ## تجاهل كلاس FirebaseConfig
+    /src/main/java/org/example/ecommerce/infrastructure/config/FirebaseConfig.java
+    #/src/main/java/org/example/ecommerce/infrastructure/config/WebSocketConfig.java
+    #/src/main/java/org/example/ecommerce/application/service/admin
+    ##/src/main/java/org/example/ecommerce/application/service/product
+    #/src/main/java/org/example/ecommerce/application/service/EmailService.java
+    #
+    ##/src/main/java/org/example/ecommerce/domain/model/product
+    #/src/main/java/org/example/ecommerce/domain/model/admin
+    #/src/main/java/org/example/ecommerce/domain/model/notification
+    #/src/main/java/org/example/ecommerce/infrastructure/dto/product
+    #/src/main/java/org/example/ecommerce/infrastructure/event
+    #/src/main/java/org/example/ecommerce/infrastructure/listener
+    #/src/main/java/org/example/ecommerce/infrastructure/repository/JpaAdminRepository.java
+    #/src/main/java/org/example/ecommerce/infrastructure/repository/JpaNotificationRepository.java
+    ##/src/main/java/org/example/ecommerce/infrastructure/repository/JpaProductRepository.java
+    #
+    #/src/main/java/org/example/ecommerce/infrastructure/controller/NotificationController.java
+    #/src/main/java/org/example/ecommerce/infrastructure/controller/ProductController.java
+    /src/main/java/org/example/ecommerce/infrastructure/web
+
 
 /src/main/resources/firebase-service-account.json
-#/src/main/java/org/example/ecommerce/infrastructure/listener/
-## تجاهل كلاس FirebaseConfig
-/src/main/java/org/example/ecommerce/infrastructure/config/FirebaseConfig.java
-#/src/main/java/org/example/ecommerce/infrastructure/config/WebSocketConfig.java
-#/src/main/java/org/example/ecommerce/application/service/admin
-##/src/main/java/org/example/ecommerce/application/service/product
-#/src/main/java/org/example/ecommerce/application/service/EmailService.java
-#
-##/src/main/java/org/example/ecommerce/domain/model/product
-#/src/main/java/org/example/ecommerce/domain/model/admin
-#/src/main/java/org/example/ecommerce/domain/model/notification
-#/src/main/java/org/example/ecommerce/infrastructure/dto/product
-#/src/main/java/org/example/ecommerce/infrastructure/event
-#/src/main/java/org/example/ecommerce/infrastructure/listener
-#/src/main/java/org/example/ecommerce/infrastructure/repository/JpaAdminRepository.java
-#/src/main/java/org/example/ecommerce/infrastructure/repository/JpaNotificationRepository.java
-##/src/main/java/org/example/ecommerce/infrastructure/repository/JpaProductRepository.java
-#
-#/src/main/java/org/example/ecommerce/infrastructure/controller/NotificationController.java
-#/src/main/java/org/example/ecommerce/infrastructure/controller/ProductController.java
-/src/main/java/org/example/ecommerce/infrastructure/web
-
-
