@@ -33,17 +33,17 @@ public class User extends BaseEntity {
     private String phoneNumber;
 
     @OneToMany(mappedBy = "customer", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
+    @JsonManagedReference("address-customer")
     private Set<Authority> authorities = new HashSet<>();
 
-    @OneToOne(cascade = CascadeType.ALL)
-    private Address pickupAddress = new Address();
+    @OneToMany(mappedBy = "customer", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference("address-customer")
+    private Set<Address> pickupAddress = new HashSet<>();
 
     private String imageUrl;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
-
     private Seller seller;
 
     private String fcmToken;

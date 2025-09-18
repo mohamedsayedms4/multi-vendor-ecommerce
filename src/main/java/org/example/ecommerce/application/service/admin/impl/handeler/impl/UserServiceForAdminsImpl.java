@@ -177,7 +177,7 @@ public class UserServiceForAdminsImpl implements UserServiceForAdmins {
                     }
 
                     if (userDTO.pickupAddress() != null) {
-                        user.setPickupAddress(userDTO.pickupAddress());
+                        user.setPickupAddress(userDTO.pickupAddress().getCustomer().getPickupAddress());
                     }
 
                     if (userDTO.phoneNumber() != null) {

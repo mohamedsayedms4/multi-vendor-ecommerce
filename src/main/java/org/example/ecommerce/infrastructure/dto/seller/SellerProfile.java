@@ -15,7 +15,7 @@ public record SellerProfile(
         String fullName,
         String phoneNumber,
         Set<AuthorityDTO> authorities,
-        AddressDTO pickupAddress,
+        Set<AddressDTO> pickupAddress,
         String imageUrl,
         BusinessDetails businessDetails,
         Boolean isEmailVerified,

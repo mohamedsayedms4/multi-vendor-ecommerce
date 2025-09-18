@@ -30,6 +30,10 @@ public interface UserMapper {
     @Mapping(target = "pickupAddress", ignore = true)
     User toUser(SignUpRequestWithoutImageProfille dto);
 
+    @Mapping(target = "authorities", ignore = true) // حسب الحاجة، أو يمكن تحويلها لاحقاً
+    @Mapping(target = "pickupAddress", ignore = true)
+    @Mapping(target = "imageUrl", source = "imageUrl")
+    User toUser(UserProfile profile);
 
     UserProfile toUserProfile(User user);
 }

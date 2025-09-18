@@ -11,7 +11,7 @@ public record UserProfile (
         String fullName,
         String phoneNumber,
         Set<AuthorityDTO> authorities,
-        AddressDTO pickupAddress,
+        Set<AddressDTO> pickupAddress,
         String imageUrl
 ){
 }

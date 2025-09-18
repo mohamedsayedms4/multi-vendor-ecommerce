@@ -1,8 +1,12 @@
 package org.example.ecommerce.domain.common;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.Entity;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.*;
+import org.example.ecommerce.domain.model.user.User;
 
 @Entity
 @Table(name = "addresses")
@@ -26,5 +30,8 @@ public class Address extends BaseEntity {
 
     private String address;
 
-
+    @ManyToOne
+    @JsonBackReference("address-customer")
+    @JoinColumn(name="customer_id")
+    private User customer;
 }

@@ -17,6 +17,7 @@ import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
 import java.time.LocalDateTime;
 
@@ -87,7 +88,8 @@ public class GlobalExceptionHandler {
             PhoneNumberIsNotValid.class,
             NameIsNotVlild.class,
             ImageIsRequired.class,
-            InvalidPWD.class
+            InvalidPWD.class,
+            MissingServletRequestPartException.class
 
     })
     public ResponseEntity<ErrorDetails> handleBadRequestExceptions(

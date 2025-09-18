@@ -19,7 +19,7 @@ public class Authority {
     // يخزن القيمة كـ نص في الجدول
     private UserRole role;
     @ManyToOne
-    @JsonBackReference
+    @JsonBackReference("address-customer")
     @JoinColumn(name="customer_id")
     private User customer;
 

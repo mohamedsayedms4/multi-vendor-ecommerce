@@ -88,11 +88,12 @@ public class ProjectSecurityConfig {
 
                 .requiresChannel(rcc -> rcc.anyRequest().requiresInsecure())
                 .authorizeHttpRequests(requests -> requests
-                        .requestMatchers("/api/v1/auth/**","/api/v1/Categories/**").permitAll()
+                        .requestMatchers("/api/v1/auth/**","/api/v1/Categories/**","api/v1/products/**","/api/v1/cart/**").permitAll()
                         .requestMatchers("/api/v1/user/**").authenticated()
                         .requestMatchers("/api/v1/sellers/**").authenticated()
                         .requestMatchers("/api/v1/admin/**").hasRole("ADMIN")
-                                .requestMatchers("api/v1/admin/notifications/**").hasRole("ADMIN")
+                                                        .requestMatchers("api/v1/admin/notifications/**").hasRole("ADMIN")
+                        .requestMatchers("/api/v1/user/notifications/**").authenticated()
                         .requestMatchers("/ws/**", "/ws", "/topic/**", "/app/**").permitAll()
 
 
