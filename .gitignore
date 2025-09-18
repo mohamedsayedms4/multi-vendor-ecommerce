@@ -32,7 +32,7 @@ build/
 ### VS Code ###
 .vscode/
 
-#/src/main/resources/firebase-service-account.json
+/src/main/resources/firebase-service-account.json
 #/src/main/java/org/example/ecommerce/infrastructure/listener/
 ## تجاهل كلاس FirebaseConfig
 /src/main/java/org/example/ecommerce/infrastructure/config/FirebaseConfig.java
